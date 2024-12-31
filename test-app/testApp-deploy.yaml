@@ -1,0 +1,39 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: test-app
+  labels:
+    app: test-app
+spec:
+  containers:
+  - command: [ "sh","-c","/usr/bin/app > /var/log/app.log" ]
+    image: localhost:5001/app:0.0.1
+    imagePullPolicy: "Always"
+    name: test-app
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: test-app-service
+spec:
+  selector:
+    app: test-app
+  ports:
+  # Default port used by the image
+  - port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: Prefix
+        path: /api
+        backend:
+          service:
+            name: test-app-service
+            port:
+              number: 8080
